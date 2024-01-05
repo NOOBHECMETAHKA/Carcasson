@@ -1,3 +1,4 @@
+import 'package:carcassonne/models/player_model.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -7,6 +8,7 @@ import 'screens/game_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
+  Hive.registerAdapter(UnitPlayerAdapter());
   runApp(const MyApp());
 }
 
@@ -20,4 +22,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-

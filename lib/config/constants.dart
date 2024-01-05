@@ -1,1 +1,1 @@
-const String savedGame = 'carcassonne';
+const String savedGameConstant = 'carcassonne';

@@ -1,9 +1,15 @@
+//libs
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+//styles
 import 'package:carcassonne/styles/base_elements_styles.dart';
 import 'package:carcassonne/styles/base_colors.dart';
-
+//configs
+import 'package:carcassonne/config/constants.dart';
+//models
 import 'package:carcassonne/models/player_model.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key});
@@ -13,17 +19,52 @@ class GameScreen extends StatefulWidget {
 }
 
 class _GameScreenState extends State<GameScreen> {
-  TextEditingController pointEditor = TextEditingController();
+  /// Контроллер текста
+  /// * Для начисления и отчисления большого количества очков мгновенно
+  TextEditingController pointEditorEditController = TextEditingController();
 
+  /// Значение выбранного элемета
+  /// * Скрывает нижнюю панель
+  /// * Указывает на выбранного юнита
   int selectedPlayer = -1;
 
-  List<UnitPlayer> players = List.of([
-    UnitPlayer("Чёрный", point: 0, image: 'lib/img/svg/Black-unit.svg'),
-    UnitPlayer("Зелёный", point: 0, image: 'lib/img/svg/Green-unit.svg'),
-    UnitPlayer("Красный", point: 0, image: 'lib/img/svg/Red-unit.svg'),
-    UnitPlayer("Жёлтый", point: 0, image: 'lib/img/svg/Yellow-unit.svg'),
-    UnitPlayer("Синий", point: 0, image: 'lib/img/svg/Blue-unit.svg'),
-  ]);
+  List<UnitPlayer> players = [];
+
+  List<UnitPlayer> getDefaultPlayers() {
+    return List.of([
+      UnitPlayer("Чёрный", 0, image: 'lib/img/svg/Black-unit.svg'),
+      UnitPlayer("Зелёный", 0, image: 'lib/img/svg/Green-unit.svg'),
+      UnitPlayer("Красный", 0, image: 'lib/img/svg/Red-unit.svg'),
+      UnitPlayer("Жёлтый", 0, image: 'lib/img/svg/Yellow-unit.svg'),
+      UnitPlayer("Синий", 0, image: 'lib/img/svg/Blue-unit.svg'),
+    ]);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    setSavedPlayers();
+  }
+
+  Future<void> setSavedPlayers() async {
+    var unitPlayersBox = await Hive.openBox<UnitPlayer>(savedGameConstant);
+    List<UnitPlayer> unitsPlayers = unitPlayersBox.values.toList();
+    setState(() {
+      players = unitsPlayers.isEmpty ? getDefaultPlayers() : unitsPlayers;
+    });
+    if (unitsPlayers.isEmpty) await unitPlayersBox.addAll(players);
+    await unitPlayersBox.close();
+  }
+
+  Future<void> changeValuesPoints(UnitPlayer player) async {
+    var unitPlayersBox = await Hive.openBox(savedGameConstant);
+    if (unitPlayersBox.isOpen) {
+      UnitPlayer playerToUpdate =
+          UnitPlayer(player.name, player.point, image: player.image);
+      await unitPlayersBox.put(player.key, playerToUpdate);
+    }
+    if (unitPlayersBox.isOpen) await unitPlayersBox.close();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +74,7 @@ class _GameScreenState extends State<GameScreen> {
         mainAxisSize: MainAxisSize.max,
         children: [
           Expanded(
-              flex: 1,
+              flex: 2,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 7),
                 child: Row(
@@ -41,8 +82,18 @@ class _GameScreenState extends State<GameScreen> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     RoundedIconButton(
-                      icon: Icons.align_horizontal_left,
+                      icon: Icons.history,
                       onTap: () {},
+                    ),
+                    RoundedIconButton(
+                      icon: Icons.align_horizontal_left,
+                      onTap: () {
+                        setState(() {
+                          players.sort((a, b) => a.point.compareTo(b.point));
+                          players = players.reversed.toList();
+                          selectedPlayer = -1;
+                        });
+                      },
                     ),
                     RoundedIconButton(
                       icon: Icons.home_outlined,
@@ -51,13 +102,34 @@ class _GameScreenState extends State<GameScreen> {
                   ],
                 ),
               )),
-          Expanded(flex: 1, child: TextField(
-            keyboardType: TextInputType.number,
-          )),
+          SizedBox(
+            height: 80,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: TextField(
+                controller: pointEditorEditController,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                maxLines: 1,
+                maxLength: 8,
+                readOnly: selectedPlayer == -1,
+                style: const TextStyle(
+                    fontSize: 20,
+                    color: blueGamerColor,
+                    fontWeight: FontWeight.bold),
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 0, horizontal: 5),
+                  border: OutlineInputBorder(gapPadding: 0),
+                  hintText: 'Начисления 😁',
+                ),
+              ),
+            ),
+          ),
           Expanded(
               flex: 10,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 5),
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
                 child: GridView.builder(
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
@@ -92,11 +164,6 @@ class _GameScreenState extends State<GameScreen> {
                                 });
                               },
                               onDoubleTap: () {
-                                setState(() {
-                                  selectedPlayer = -1;
-                                });
-                              },
-                              onLongPress: () {
                                 setState(() {
                                   selectedPlayer = -1;
                                 });
@@ -138,7 +205,7 @@ class _GameScreenState extends State<GameScreen> {
               )),
           selectedPlayer != -1
               ? Expanded(
-                  flex: 1,
+                  flex: 2,
                   child: Padding(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 5, vertical: 7),
@@ -150,21 +217,47 @@ class _GameScreenState extends State<GameScreen> {
                         getPlayerLabel(players[selectedPlayer].name),
                         Row(
                           children: [
+                            /// Кнопка добавления очков
+                            /// Если в поле "Начисления" введено значение, то количество очков увеличится
+                            /// Если пусто прибавится 1
                             RoundedIconButton(
                                 icon: Icons.add,
                                 onTap: () {
                                   setState(() {
-                                    players[selectedPlayer].point++;
+                                    int? points = int.tryParse(
+                                        pointEditorEditController.text);
+                                    if (points != null) {
+                                      players[selectedPlayer].point =
+                                          players[selectedPlayer].point +
+                                              points;
+                                    } else {
+                                      players[selectedPlayer].point++;
+                                    }
+                                    pointEditorEditController.text = "";
                                   });
+                                  changeValuesPoints(players[selectedPlayer]);
                                 }),
                             RoundedIconButton(
                                 icon: Icons.remove,
                                 onTap: () {
                                   setState(() {
-                                    if (players[selectedPlayer].point != 0) {
+                                    int? points = int.tryParse(
+                                        pointEditorEditController.text);
+                                    if (points != null) {
+                                      if (players[selectedPlayer].point -
+                                              points <
+                                          0) {
+                                        players[selectedPlayer].point = 0;
+                                      } else{
+                                        players[selectedPlayer].point = 
+                                        players[selectedPlayer].point - points;
+                                      }
+                                    } else if (players[selectedPlayer].point !=
+                                        0) {
                                       players[selectedPlayer].point--;
-                                    }
+                                    } 
                                   });
+                                  changeValuesPoints(players[selectedPlayer]);
                                 }),
                           ],
                         )
@@ -187,75 +280,6 @@ class _GameScreenState extends State<GameScreen> {
         child: Text(
           playerName,
           style: TextStyle(fontSize: 24, color: getPlayerColor(playerName)),
-        ),
-      ),
-    );
-  }
-}
-
-//===Outher Styles
-
-class TwoColumnList extends StatelessWidget {
-  const TwoColumnList({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return GridView.builder(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-      ),
-      itemCount: 10,
-      itemBuilder: (BuildContext context, int index) {
-        return ListTile(
-          title: Text('Item $index'),
-          subtitle: Text('Subtitle $index'),
-          leading: Icon(Icons.list),
-          onTap: () {
-            print('Tapped on Item $index');
-          },
-        );
-      },
-    );
-  }
-}
-
-class RoundedIconButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const RoundedIconButton({required this.icon, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 5),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20.0),
-          boxShadow: const [
-            BoxShadow(
-              color: blueGamerColor,
-              offset: Offset(0, 4),
-              blurRadius: 0, // Размытие тени
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(20.0),
-          child: Material(
-            color: whiteBackgroundColor,
-            child: InkWell(
-              onTap: onTap,
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Icon(
-                  icon,
-                  size: 36.0,
-                  color: blueGamerColor,
-                ),
-              ),
-            ),
-          ),
         ),
       ),
     );

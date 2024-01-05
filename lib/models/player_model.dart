@@ -7,9 +7,9 @@ class UnitPlayer extends HiveObject {
   @HiveField(0)
   String name;
   @HiveField(1)
-  int point = 0;
+  int point;
   @HiveField(2)
   String? image;
 
-  UnitPlayer(this.name, {required int point, this.image});
+  UnitPlayer(this.name, this.point, {this.image});
 }

@@ -18,7 +18,7 @@ class UnitPlayerAdapter extends TypeAdapter<UnitPlayer> {
     };
     return UnitPlayer(
       fields[0] as String,
-      point: fields[1] as int,
+      fields[1] as int,
       image: fields[2] as String?,
     );
   }
