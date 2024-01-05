@@ -1,16 +1,15 @@
-# carcassonne
+# Просто счётчик
+Цель данной разработки рассмореть сколько у меня свободного времяни на каникулах, что я занимаюсь такой шнягой
 
-A new Flutter project.
+# Библиотеки
+* Hive
+* Hive_flutter
+* Provider
+* Shared preferences
+* Flutter svg
 
-## Getting Started
+# Библиотеки разработчика
+* build_runner
+* hive_generator
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+<h3>Настя лох</h3>
