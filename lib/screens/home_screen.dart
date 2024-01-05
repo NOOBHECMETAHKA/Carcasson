@@ -1,6 +1,13 @@
+//libs
+import 'package:carcassonne/config/constants.dart';
+import 'package:carcassonne/models/player_model.dart';
 import 'package:flutter/material.dart';
+//styles
 import 'package:carcassonne/styles/base_elements_styles.dart';
 import 'package:carcassonne/styles/base_colors.dart';
+//configs
+import 'package:carcassonne/config/routes.dart';
+import 'package:hive/hive.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -10,6 +17,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  /// Метод создания новой игры
+  Future<void> newGameUnits() async {
+    var unitPlayersBox = await Hive.openBox<UnitPlayer>(savedGameConstant);
+    await unitPlayersBox.clear();
+    await unitPlayersBox.addAll(getDefaultPlayers());
+    await unitPlayersBox.close();
+    return;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,7 +52,9 @@ class _HomeScreenState extends State<HomeScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 5),
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.pushNamed(context, gameRoute);
+                  },
                   style: buttonPrimaryStyle,
                   child: const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 18),
@@ -48,7 +66,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () async {
+                  await newGameUnits();
+                  // ignore: use_build_context_synchronously
+                  Navigator.pushNamed(context, gameRoute);
+                },
                 style: buttonPrimaryStyle,
                 child: const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20, vertical: 18),
