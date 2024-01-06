@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 const Color blueGamerColor = Color.fromARGB(255, 3, 96, 160);
-const Color whiteGamerColor = Color.fromARGB(255, 255, 255, 255);
-const Color whiteBackgroundColor = Color.fromARGB(255, 250, 250, 250);
+Color whiteGamerColor = const Color.fromARGB(255, 255, 255, 255);
+Color whiteBackgroundColor = const Color.fromARGB(255, 250, 250, 250);
 const Color lastUpdateGreyBackgorundColor = Color.fromARGB(255, 230, 230, 230);
 
 //Units colors

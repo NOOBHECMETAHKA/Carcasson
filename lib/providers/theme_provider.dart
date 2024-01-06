@@ -1,3 +1,4 @@
+import 'package:carcassonne/styles/base_colors.dart';
 import 'package:flutter/material.dart';
 
 class ThemeProvider with ChangeNotifier {

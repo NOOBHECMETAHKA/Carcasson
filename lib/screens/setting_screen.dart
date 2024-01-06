@@ -14,33 +14,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(mainAxisSize: MainAxisSize.max, children: [
-        Expanded(
-            child: Row(
+      body: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
           mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            RoundedIconButton(
-              icon: Icons.theater_comedy,
-              onTap: () {
-                context.read<ThemeProvider>().toggleTheme();
-              },
-            ),
-            RoundedIconButton(
-              icon: Icons.cast,
-              onTap: () {
-                
-              },
-            ),
-            RoundedIconButton(
-              icon: Icons.videogame_asset,
-              onTap: () {
-                Navigator.pop(context);
-              },
-            )
-          ],
-        ))
-      ]),
+           Padding(
+             padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 7),
+             child: Row(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  RoundedIconButton(
+                    icon: Icons.theater_comedy,
+                    onTap: () {
+                      setState(() {
+                        context.read<ThemeProvider>().toggleTheme();
+                      });
+                    },
+                  ),
+                  RoundedIconButton(
+                    icon: Icons.cast,
+                    onTap: () {},
+                  ),
+                  RoundedIconButton(
+                    icon: Icons.videogame_asset,
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                  )
+                ],
+              ),
+           )
+            
+          ]),
     );
   }
 }

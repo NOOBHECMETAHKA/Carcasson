@@ -12,4 +12,6 @@ class UnitPlayer extends HiveObject {
   String? image;
 
   UnitPlayer(this.name, this.point, {this.image});
+
+  
 }

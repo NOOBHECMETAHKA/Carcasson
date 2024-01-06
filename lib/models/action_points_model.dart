@@ -9,7 +9,10 @@ class ActionPoints extends HiveObject {
   @HiveField(1)
   int countPoint;
   @HiveField(2)
+  bool isNegative;
+  @HiveField(3)
   String namePlayer;
 
-  ActionPoints(this.createAt, this.countPoint, this.namePlayer);
+  ActionPoints(
+      this.createAt, this.isNegative, this.countPoint, this.namePlayer);
 }

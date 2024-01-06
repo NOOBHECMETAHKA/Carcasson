@@ -26,6 +26,15 @@ class _HomeScreenState extends State<HomeScreen> {
     return;
   }
 
+  Future<void> _clearHistory() async {
+    var actionsPointsBox = await Hive.openBox(savedGameResult);
+    if (actionsPointsBox.isOpen) {
+      actionsPointsBox.deleteFromDisk();
+    }
+    if (actionsPointsBox.isOpen) await actionsPointsBox.close();
+    return;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,9 +43,9 @@ class _HomeScreenState extends State<HomeScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [blueGamerColor, Colors.white],
+                colors: [blueGamerColor, whiteBackgroundColor],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
@@ -56,8 +65,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     Navigator.pushNamed(context, gameRoute);
                   },
                   style: buttonPrimaryStyle,
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 18),
                     child: Text(
                       "Продолжить",
                       style: buttonContentPrimaryStyle,
@@ -68,12 +78,14 @@ class _HomeScreenState extends State<HomeScreen> {
               ElevatedButton(
                 onPressed: () async {
                   await newGameUnits();
+                  await _clearHistory();
                   // ignore: use_build_context_synchronously
                   Navigator.pushNamed(context, gameRoute);
                 },
                 style: buttonPrimaryStyle,
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                   child: Text(
                     "Новая игра",
                     style: buttonContentPrimaryStyle,

@@ -18,20 +18,23 @@ class ActionPointsAdapter extends TypeAdapter<ActionPoints> {
     };
     return ActionPoints(
       fields[0] as DateTime,
+      fields[2] as bool,
       fields[1] as int,
-      fields[2] as String,
+      fields[3] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, ActionPoints obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(4)
       ..writeByte(0)
       ..write(obj.createAt)
       ..writeByte(1)
       ..write(obj.countPoint)
       ..writeByte(2)
+      ..write(obj.isNegative)
+      ..writeByte(3)
       ..write(obj.namePlayer);
   }
 

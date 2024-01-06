@@ -1,4 +1,6 @@
 //libs
+import 'package:carcassonne/config/routes.dart';
+import 'package:carcassonne/models/action_points_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -28,15 +30,18 @@ class _GameScreenState extends State<GameScreen> {
   /// * Скрывает нижнюю панель и отменяет фокусирование
   /// * Указывает на выбранного юнита
   int selectedPlayer = -1;
+
   /// Текущая коллекция игровых юнитов
   /// Во время обновления обновляет и видимый список
   List<UnitPlayer> players = [];
+
   ///Инициалзиция виджета
   @override
   void initState() {
     super.initState();
     _setSavedPlayers();
   }
+
   // -- Инициализация методов
   /// Инициализация списка юнитов
   Future<void> _setSavedPlayers() async {
@@ -48,8 +53,11 @@ class _GameScreenState extends State<GameScreen> {
     if (unitsPlayers.isEmpty) await unitPlayersBox.addAll(players);
     await unitPlayersBox.close();
   }
-  /// Метод сохраннения изменение (добавление или вычитания очков) в Hive 
-  Future<void> _changeValuesPoints(UnitPlayer player) async {
+
+  /// Метод сохраннения изменение (добавление или вычитания очков) в Hive
+  Future<void> _changeValuesPoints(UnitPlayer player, bool isNegative,
+      {int? updatedPoints}) async {
+    //Сохранение действия
     var unitPlayersBox = await Hive.openBox(savedGameConstant);
     if (unitPlayersBox.isOpen) {
       UnitPlayer playerToUpdate =
@@ -57,7 +65,17 @@ class _GameScreenState extends State<GameScreen> {
       await unitPlayersBox.put(player.key, playerToUpdate);
     }
     if (unitPlayersBox.isOpen) await unitPlayersBox.close();
+
+    //Создание истории действий
+    var actionsPointsBox = await Hive.openBox(savedGameResult);
+    if (actionsPointsBox.isOpen) {
+      ActionPoints actionPoints = ActionPoints(
+          DateTime.now(), isNegative, updatedPoints ?? 1, player.name);
+      actionsPointsBox.add(actionPoints);
+    }
+    if (actionsPointsBox.isOpen) await actionsPointsBox.close();
   }
+
   // Сортировка юнитов
   void _sortUnits() {
     setState(() {
@@ -71,16 +89,19 @@ class _GameScreenState extends State<GameScreen> {
   /// * Если в поле "Начисления" введено значение, то количество очков увеличится на указанное значение
   /// * Если поле "Начисления" пусто, то прибавится 1
   void _addPointUser() {
+    int endedValueToSendHistory = 1;
     setState(() {
       int? points = int.tryParse(pointEditorEditController.text);
       if (points != null) {
         players[selectedPlayer].point = players[selectedPlayer].point + points;
+        endedValueToSendHistory = points;
       } else {
         players[selectedPlayer].point++;
       }
       pointEditorEditController.text = "";
     });
-    _changeValuesPoints(players[selectedPlayer]);
+    _changeValuesPoints(players[selectedPlayer], false,
+        updatedPoints: endedValueToSendHistory);
   }
 
   /// Кнопка вычитания очков с сохранением в базу изменений
@@ -88,21 +109,25 @@ class _GameScreenState extends State<GameScreen> {
   /// * Если поле "Начисления" пусто, то вычтется 1
   /// * Если указанное значение больше текущего, значение текущего юнита обнулится
   void _remotePointUser() {
+    int endedValueToSendHistory = 1;
     setState(() {
       int? points = int.tryParse(pointEditorEditController.text);
       if (points != null) {
         if (players[selectedPlayer].point - points < 0) {
+          endedValueToSendHistory = players[selectedPlayer].point;
           players[selectedPlayer].point = 0;
         } else {
           players[selectedPlayer].point =
               players[selectedPlayer].point - points;
+          endedValueToSendHistory = points;
         }
       } else if (players[selectedPlayer].point != 0) {
         players[selectedPlayer].point--;
       }
       pointEditorEditController.text = "";
     });
-    _changeValuesPoints(players[selectedPlayer]);
+    _changeValuesPoints(players[selectedPlayer], true,
+        updatedPoints: endedValueToSendHistory);
   }
 
   Container getPlayerLabel(String playerName) {
@@ -135,9 +160,17 @@ class _GameScreenState extends State<GameScreen> {
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
+                    // RoundedIconButton(
+                    //   icon: Icons.settings,
+                    //   onTap: () {
+                    //     Navigator.pushNamed(context, settingsRoute);
+                    //   },
+                    // ),
                     RoundedIconButton(
                       icon: Icons.history,
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.pushNamed(context, historyRoute);
+                      },
                     ),
                     RoundedIconButton(
                       icon: Icons.align_horizontal_left,

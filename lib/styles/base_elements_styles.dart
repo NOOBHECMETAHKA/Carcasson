@@ -7,11 +7,22 @@ final ButtonStyle buttonPrimaryStyle = ElevatedButton.styleFrom(
     shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(20))));
 
-const TextStyle buttonContentPrimaryStyle = TextStyle(
+TextStyle buttonContentPrimaryStyle = TextStyle(
     color: whiteGamerColor, fontSize: 26, fontWeight: FontWeight.w600);
 
+const TextStyle buttonContentBigTextStyle = TextStyle(
+    color: blueGamerColor, fontSize: 36, fontWeight: FontWeight.w600);
+
+const TextStyle middleBlueLabelBold = TextStyle(
+  color: blueGamerColor, fontSize: 18, fontWeight: FontWeight.w600
+);
+
+const TextStyle middleGreyLabelBold = TextStyle(
+  color: Colors.grey, fontSize: 18, fontWeight: FontWeight.w600
+);
+
 final ButtonStyle buttonIconsStyle = ElevatedButton.styleFrom(
-  shadowColor: blueGamerColor,
+    shadowColor: blueGamerColor,
     primary: whiteBackgroundColor,
     elevation: 0,
     shape: const RoundedRectangleBorder(
